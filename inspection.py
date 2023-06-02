@@ -134,16 +134,40 @@ class InspectionClass():
                 T_OF = self.get_offset_fixed(p, r)
                 T_BF = self.destination(T_OF)
                 T_BF[:2,3] = mm2unit(self.to_unit, T_BF[:2,3])
-                T_BF_list.append(T_BF)
+                T_BF_list.append([T_BF, self.det_tilt(h, r)])
             dict_T_BF[h] = T_BF_list
         return dict_T_BF
     
     def list_inspt_all_edges(self):
+        '''
+        가공품의 밑 부분부터 위쪽으로 edge를 순차적으로 검사
+        '''
         dict_T_BF = self.inspt_all_edges()
         list_all_edges = list()
         for edge, T_BF_list in dict_T_BF.items():
             for T_BF in T_BF_list:
-                list_all_edges.append(T_BF)
+                list_all_edges.append(T_BF[0])
+        return list_all_edges
+    
+    def list_inspt_all_edges_tilt_ord(self):
+        '''
+        검사 각도 tilt 값이 PHI, 0, -PHI 값 순서로 검사
+        (PHI 각도의 edge 모두 검사 -> 0 각도 -> -PHI 각도)
+        '''
+        dict_T_BF = self.inspt_all_edges()
+        list_all_edges = list()
+        for edge, T_BF_list in dict_T_BF.items():
+            for T_BF in T_BF_list:
+                if T_BF[1] == PHI*DEG2RAD:
+                    list_all_edges.append(T_BF[0])
+        for edge, T_BF_list in dict_T_BF.items():
+            for T_BF in T_BF_list:
+                if T_BF[1] == 0:
+                    list_all_edges.append(T_BF[0])
+        for edge, T_BF_list in dict_T_BF.items():
+            for T_BF in T_BF_list:
+                if T_BF[1] == -PHI*DEG2RAD:
+                    list_all_edges.append(T_BF[0])
         return list_all_edges
     
     def inspt_spec_edge(self):
