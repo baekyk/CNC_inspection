@@ -175,7 +175,7 @@ class MoveGroupFranka(object):
         self.group_names = group_names
 
         # -- load inspt path -- #
-        self.inspt_clss = InspectionClass(dxf, T_BO, T_CE, offset, theta, center_layer, height, METERS)
+        self.inspt_clss = InspectionClass(dxf, T_BO, T_CE, offset, theta, center_layer, height, unit)
         self.list_all_edges = self.inspt_clss.list_inspt_all_edges()
         self.spec_edge = self.inspt_clss.inspt_spec_edge()
     
@@ -356,7 +356,18 @@ def main():
         input(
             "============ Press `Enter` to begin the tutorial by setting up the moveit_commander ..."
         )
-        tutorial = MoveGroupFranka()
+
+        TARGET_DXF = 'SAMPLE2.dxf'
+        CENTER_LAYER = 'BK_CENTER'
+        T_CE = np.array([[1, 0, 0, 0],
+                         [0, 1, 0, 0.033],
+                         [0, 0, 1, -0.021],
+                         [0, 0, 0, 1]]) # 설계상 nominal parameters
+        H = 70
+        D = 30
+        THETA = np.pi
+        T_BO = transl(np.array([630, 0, 0])) 
+        tutorial = MoveGroupFranka(TARGET_DXF, T_BO, T_CE, D, THETA, CENTER_LAYER, H, METERS)
 
         input("============ Press `Enter` to execute a movement using a pose goal ...")
         tutorial.go_to_pose_goal(tutorial.list_all_edges)

@@ -70,13 +70,16 @@ class InspectionClass():
         elif inter_phi > 0:
             height_end = height + self.offset*np.sin(PHI)
             step = 1
+            margine = self.offset*0.05
         elif inter_phi < 0 :
             height_end = height - self.offset*np.sin(PHI)
             step = -1
+            margine = -self.offset*0.05
 
         if height_end <= 0:
             return 0
-        space = np.arange(height+step, height_end, step)
+        
+        space = np.arange(height+margine, height_end, step)
         for h in space:
             if h > self.cad.edges[-1]:
                 return inter_phi
@@ -89,7 +92,7 @@ class InspectionClass():
                 sight_line = -h - r + height
             entity_r = self.cad.get_r(self.cad.bottom,h)
             for enti_r in entity_r:
-                if enti_r >= sight_line - self.offset*0.05:
+                if enti_r >= sight_line - margine:
                     return 0
             return inter_phi
     
