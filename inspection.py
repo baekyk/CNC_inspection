@@ -68,11 +68,11 @@ class InspectionClass():
         if inter_phi == 0 :
             return 0
         elif inter_phi > 0:
-            height_end = height + self.offset*np.sin(PHI)
+            height_end = height + self.offset*np.sin(PHI*DEG2RAD)
             step = 1
             margine = self.offset*0.05
         elif inter_phi < 0 :
-            height_end = height - self.offset*np.sin(PHI)
+            height_end = height - self.offset*np.sin(PHI*DEG2RAD)
             step = -1
             margine = -self.offset*0.05
 
@@ -136,7 +136,7 @@ class InspectionClass():
             for r in r_list:
                 T_OF = self.get_offset_fixed(p, r)
                 T_BF = self.destination(T_OF)
-                T_BF[:2,3] = mm2unit(self.to_unit, T_BF[:2,3])
+                T_BF[:3,3] = mm2unit(self.to_unit, T_BF[:3,3])
                 T_BF_list.append([T_BF, self.det_tilt(h, r)])
             dict_T_BF[h] = T_BF_list
         return dict_T_BF
@@ -185,7 +185,7 @@ class InspectionClass():
         for r in r_list:
             T_OF = self.get_offset_fixed(p, r)
             T_BF = self.destination(T_OF)
-            T_BF[:2,3] = mm2unit(self.to_unit, T_BF[:2,3])
+            T_BF[:3,3] = mm2unit(self.to_unit, T_BF[:3,3])
             T_BF_list.append(T_BF)
         return T_BF_list
     
