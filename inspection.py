@@ -7,10 +7,10 @@ class PointClass():
         self.d = d
 
 class InspectionClass():
-    def __init__(self, dxf, T_BO, T_CE, offset, theta, center_layer, height=None, unit=MILLEMETERS):
+    def __init__(self, dxf, T_BO, T_EC, offset, theta, center_layer, height=None, unit=MILLEMETERS):
         '''
         T_BO : 로봇으로 부터 물체의 위치 \n
-        T_CE : 카메라로 부터 End-effector의 위치 \n
+        T_EC : End-effector부터 카메라의 위치 \n
         offset : 검사 위치로부터 카메라를 offset 시킬 거리 \n
         theta : 물체의 x 좌표로 부터 로봇의 방향, 각도(radian) \n
         center_laber : CAD 도면 상 중심선 layer의 이름 \n
@@ -18,7 +18,7 @@ class InspectionClass():
         '''
         self.cad = InfoCAD(dxf, center_layer)
         self.T_BO = T_BO
-        self.T_CE = T_CE
+        self.T_EC = T_EC
         self.offset = offset
         self.theta = theta
         self.height = height
@@ -28,7 +28,7 @@ class InspectionClass():
         """
         get robot target pose
         """
-        T_BF = self.T_BO @ T_OF @ inv_tform(self.T_CE)
+        T_BF = self.T_BO @ T_OF @ inv_tform(self.T_EC)
         return T_BF
     
     def det_inter_tilt(self, height):
