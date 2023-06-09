@@ -324,8 +324,10 @@ def pose2tr(vec, eulType = 'XYZ'):
 
     if eulType == 'XYZ':
         T = eulXYZ2tr(eul)
-    elif eulType == 'RPY':
+    elif eulType == 'RPY_old':
         T = eulRPY2tr(eul)
+    elif eulType == 'RPY':
+            T = eulINDY2tr(eul)
 
     T[0:3, 3] = pos
 
@@ -340,8 +342,10 @@ def tr2pose(T, in180=False, eulType='XYZ'):
         p[0:3] = T[0:3, 3]
         if eulType == 'XYZ':
             p[3:] = tr2eulXYZ(T[0:3, 0:3], in180=in180)
-        elif eulType == 'RPY':
+        elif eulType == 'RPY_old':
             p[3:] = tr2eulRPY(T[0:3, 0:3], in180=in180)
+        elif eulType == 'RPY':
+                p[3:] = tr2eulINDY(T[0:3, 0:3], in180=in180)
         else:
             raise Exception("[]".format(funcname()) + \
                             MSG_ERR_ARG_MUSTBE_EUL)
@@ -401,6 +405,66 @@ def tr2eulXYZ(R, in180=True, TINY=1e-4):
 
     return np.array([phi, theta, psi])
 
+
+'''
+/////////////////////////////////////////////////////////////////////////////
+#                            EULER EUL_RPY (INDY7)
+/////////////////////////////////////////////////////////////////////////////
+'''
+def eulINDY2r(eul):
+    eul = list(eul)
+    eul[0] = float(eul[0])
+    eul[1] = float(eul[1])
+    eul[2] = float(eul[2])
+    r, p, y = eul
+    
+    return rotz(eul[2]) @ roty(eul[1]) @ rotx(eul[0])
+
+def eulINDY2tr(eul):
+    eul = list(eul)
+    eul[0] = float(eul[0])
+    eul[1] = float(eul[1])
+    eul[2] = float(eul[2])
+    r, p, y = eul
+    
+    return trotz(eul[2]) @ troty(eul[1]) @ trotx(eul[0])
+
+def tr2eulINDY(R, in180=True, TINY=1e-4):
+    """ convert a 3x3 rotation matrix into 3x1 INDY7 euler vector
+    TODO:
+    - Check SO(3) Functions
+    """
+    
+    try:
+        if -R[2, 0] < 1 and -R[0, 2] > -1:
+            r = np.arctan2(R[2, 1], R[2, 2])
+            p = np.arctan2(-R[2, 0], np.sqrt(R[2, 1]**2 + R[2, 2]**2))
+            y = np.arctan2(R[1, 0], R[0, 0])
+        elif np.abs(-R[2, 0] + 1) < TINY:
+            p = -np.pi/2
+            r = 0.0
+            y = np.arctan2(-R[1, 2], R[1, 1]) # 
+        elif np.abs(-R[2, 0] - 1) < TINY:
+            p = np.pi/2
+            r = 0.0
+            y = np.arctan2(R[1, 2], R[1, 1])
+        else:
+            raise Exception("[{}]".format(funcname()) + \
+                            "R[0,2] is out of range (1, -1), R[0,2] :", R[0, 2])
+        if in180 == True:
+            r = set_in_180(r)
+            p = set_in_180(p)
+            y = set_in_180(y)
+
+    except:
+        print(MSG_ERR_EXCEPT)
+        print("R : ", R)
+        print("in180 : ", in180)
+        print("TINY : ", TINY)
+
+    return np.array([r, p, y])
+
+    
 def rpy2r(thetas, order='zyx', unit='rad'):
     """
     RPY2R Roll-pitch-yaw angles to rotation matrix

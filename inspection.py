@@ -104,7 +104,7 @@ class InspectionClass():
         off_y = (r+d*np.cos(phi))*np.sin(self.theta)
         off_z = z + d*np.sin(phi)
         tform = transl([off_x, off_y, off_z])
-        return tform  @ troty(phi + np.pi/2)
+        return tform @ trotx(np.pi) @ troty(np.pi/2 - phi)
     
     def make_all_list(self):
         '''
