@@ -39,12 +39,12 @@ class Insert:
         self.flag = None
 
 class InfoCAD():
-    def __init__(self, target_dxf, center_layer='BK_CENTER'):
+    def __init__(self, target_dxf):
         self.dxf_file = target_dxf
-        self.center_layer = center_layer
 
         # dxf 파일 읽기
         self.doc = self.data_loader(self.dxf_file)
+        self.verify_dxf(self.doc)
         self.msp = self.doc.modelspace()
         self.dxf_unit = self.get_dxf_unit()
         # self.dxf_unit = CENTIMETERS
@@ -52,13 +52,22 @@ class InfoCAD():
         # entities 추출
         self.v_dim, self.h_dim, self.angle_dim = self.get_dimensions(self.msp)
         self.v_line, self.h_line, self.d_line= self.get_lines(self.msp)
-        self.center_line = self.get_centerline(self.msp, self.center_layer)
+        self.center_line = self.get_centerline(self.msp)
         self.inserts = self.get_inserts(self.doc, self.msp)
         self.arcs = self.get_arcs(self.msp)
 
         # 밑면의 entity
         self.bottom = self.bottom_entity(self.center_line, self.arcs, self.d_line, self.h_line)
         self.edges = self.edge_list(self.bottom)
+        self.edges_table = self.edge_table(self.edges)
+
+    def verify_dxf(self, doc):
+        layer_names = list()
+        for layer in doc.layers:
+            layer_names.append(layer.dxf.name)
+        for name in  [CENTER_LAYER, ENTITY_LAYER, DIM_LAYER]:
+            if name not in layer_names:
+                raise Exception(MSG_ERR_LAYER)
 
     def data_loader(self, dxf_file):
         doc = ezdxf.readfile(dxf_file)
@@ -78,35 +87,36 @@ class InfoCAD():
         angle_dim = []
 
         for d in msp.query('dimension'):
-            dim = Dimension()
-            pt = self.vec2coordnt(d.dxf.defpoint)
-            pt2 = self.vec2coordnt(d.dxf.defpoint2)
-            pt3 = self.vec2coordnt(d.dxf.defpoint3)
-            pt4 = self.vec2coordnt(d.dxf.defpoint4)
-            angle = d.dxf.angle
+            if d.dxf.layer == DIM_LAYER:
+                dim = Dimension()
+                pt = self.vec2coordnt(d.dxf.defpoint)
+                pt2 = self.vec2coordnt(d.dxf.defpoint2)
+                pt3 = self.vec2coordnt(d.dxf.defpoint3)
+                pt4 = self.vec2coordnt(d.dxf.defpoint4)
+                angle = d.dxf.angle
 
-            if pt2[0] != 0 and round(angle,3) != (0 or 90.0):
-                dim.defpt = pt
-                dim.defpt2, dim.defpt3 = arange_point(pt2, pt3)
-                dim.angle = angle
-                dim.text = (round(d.dxf.actual_measurement))
-                dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
-                h_dim.append(dim)
+                if pt2[0] != 0 and round(angle,3) != (0 or 90.0):
+                    dim.defpt = pt
+                    dim.defpt2, dim.defpt3 = arange_point(pt2, pt3)
+                    dim.angle = angle
+                    dim.text = (round(d.dxf.actual_measurement))
+                    dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
+                    h_dim.append(dim)
 
-            elif pt2[0] != 0 and round(angle,3) == 90.0:
-                dim.defpt = pt
-                dim.defpt2, dim.defpt3 = arange_point(pt2, pt3)
-                dim.angle = angle
-                dim.text = (round(d.dxf.actual_measurement))
-                dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
-                v_dim.append(dim)
+                elif pt2[0] != 0 and round(angle,3) == 90.0:
+                    dim.defpt = pt
+                    dim.defpt2, dim.defpt3 = arange_point(pt2, pt3)
+                    dim.angle = angle
+                    dim.text = (round(d.dxf.actual_measurement))
+                    dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
+                    v_dim.append(dim)
 
-            elif pt2[0] == 0 and pt4[0] != 0:
-                dim.defpt2 = pt
-                dim.defpt3 = pt4
-                dim.text = (round(d.dxf.actual_measurement))
-                dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
-                angle_dim.append(dim)
+                elif pt2[0] == 0 and pt4[0] != 0:
+                    dim.defpt2 = pt
+                    dim.defpt3 = pt4
+                    dim.text = (round(d.dxf.actual_measurement))
+                    dim.loc_text = self.vec2coordnt(d.dxf.text_midpoint)
+                    angle_dim.append(dim)
         return v_dim, h_dim, angle_dim
 
     def get_lines(self, msp):
@@ -114,40 +124,42 @@ class InfoCAD():
         h_line = []
         d_line = []
         for l in msp.query('line'):
-            ln = Line()
-            start = self.vec2coordnt(l.dxf.start)        
-            end = self.vec2coordnt(l.dxf.end)
+            if l.dxf.layer == ENTITY_LAYER:
+                ln = Line()
+                start = self.vec2coordnt(l.dxf.start)        
+                end = self.vec2coordnt(l.dxf.end)
 
-            if start[0] != end[0] and start[1] == end[1]:
-                ln.start, ln.end = arange_point(start, end)
-                h_line.append(ln)
-            
-            elif start[0] == end[0] and start[1] != end[1]:
-                ln.start, ln.end = arange_point(start, end)
-                v_line.append(ln)
-            
-            elif start[0] != end[0] and start[1] != end[1]:
-                ln.start, ln.end = arange_point(start, end)
-                d_line.append(ln)
+                if start[0] != end[0] and start[1] == end[1]:
+                    ln.start, ln.end = arange_point(start, end)
+                    h_line.append(ln)
+                
+                elif start[0] == end[0] and start[1] != end[1]:
+                    ln.start, ln.end = arange_point(start, end)
+                    v_line.append(ln)
+                
+                elif start[0] != end[0] and start[1] != end[1]:
+                    ln.start, ln.end = arange_point(start, end)
+                    d_line.append(ln)
         return v_line, h_line, d_line
 
     def get_arcs(self, msp):
         arcs =[]
         for a in msp.query('arc'):
-            ar = Arc()
-            ar.center = self.vec2coordnt(a.dxf.center)
-            ar.radius = unit2mm(self.dxf_unit, a.dxf.radius)
-            ar.start_angle = a.dxf.start_angle
-            ar.end_angle = a.dxf.end_angle
-            ar.start_point = self.vec2coordnt(a.start_point)
-            ar.end_point = self.vec2coordnt(a.end_point)
-            arcs.append(ar)
+            if a.dxf.layer == ENTITY_LAYER:
+                ar = Arc()
+                ar.center = self.vec2coordnt(a.dxf.center)
+                ar.radius = unit2mm(self.dxf_unit, a.dxf.radius)
+                ar.start_angle = a.dxf.start_angle
+                ar.end_angle = a.dxf.end_angle
+                ar.start_point = self.vec2coordnt(a.start_point)
+                ar.end_point = self.vec2coordnt(a.end_point)
+                arcs.append(ar)
         return arcs
 
-    def get_centerline(self, msp, c_layer):
+    def get_centerline(self, msp):
         ln = Line()
         for l in msp.query('line'):
-            if l.dxf.layer == c_layer:
+            if l.dxf.layer == CENTER_LAYER:
                 ln.start = self.vec2coordnt(l.dxf.start)
                 ln.end = self.vec2coordnt(l.dxf.end)
                 return ln
@@ -182,6 +194,13 @@ class InfoCAD():
             edges.append(round(x_start_whichtype(b)-init,3))
         edges.append(round(x_end_whichtype(bottom[-1])-init,3))
         return edges
+
+    def edge_table(self, edges):
+        edges_table = dict()
+        for edge in edges:
+            r_list = self.get_r(self.bottom, edge)
+            edges_table[edge]=r_list
+        return edges_table
 
     def bottom_entity(self, center_line, arcs, d_line, h_line):
         bottom = list()
@@ -353,5 +372,5 @@ if __name__ == '__main__':
     dxf_file = 'SAMPLE2.dxf'
     # # dxf_file = 'test.dxf'
     center_layer = 'BK_CENTER'
-    cad = InfoCAD(dxf_file, center_layer)
-    print(cad.edges)
+    cad = InfoCAD(dxf_file)
+    print(cad.edges_table)

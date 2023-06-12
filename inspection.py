@@ -7,7 +7,7 @@ class PointClass():
         self.d = d
 
 class InspectionClass():
-    def __init__(self, dxf, T_BO, T_EC, offset, theta, center_layer, height=None, unit=MILLEMETERS):
+    def __init__(self, dxf, T_BO, T_EC, offset, theta, height=None, unit=MILLEMETERS):
         '''
         T_BO : 로봇으로 부터 물체의 위치 \n
         T_EC : End-effector부터 카메라의 위치 \n
@@ -16,7 +16,7 @@ class InspectionClass():
         center_laber : CAD 도면 상 중심선 layer의 이름 \n
         height : 검사하려는 물체의 높이 \n
         '''
-        self.cad = InfoCAD(dxf, center_layer)
+        self.cad = InfoCAD(dxf)
         self.T_BO = T_BO
         self.T_EC = T_EC
         self.offset = offset
@@ -58,7 +58,7 @@ class InspectionClass():
             return PHI*DEG2RAD
         elif left > r and r >= right:
             return PHI*DEG2RAD
-
+        
     def det_tilt(self, height, r):
         '''
         det_inter_tilt에서 반환된 tilt 값에 대한 카메라 시야를 고려하여
@@ -69,32 +69,26 @@ class InspectionClass():
             return 0
         elif inter_phi > 0:
             height_end = height + self.offset*np.sin(PHI*DEG2RAD)
-            step = 1
-            margine = self.offset*0.05
         elif inter_phi < 0 :
             height_end = height - self.offset*np.sin(PHI*DEG2RAD)
-            step = -1
-            margine = -self.offset*0.05
+        margine = self.offset*0.05
 
         if height_end <= 0:
             return 0
-        
-        space = np.arange(height+margine, height_end, step)
-        for h in space:
-            if h > self.cad.edges[-1]:
-                return inter_phi
-            if h < self.cad.edges[0]:
-                return 0
-            
-            if inter_phi == PHI*DEG2RAD:
-                sight_line = h + r - height
-            elif inter_phi == -PHI*DEG2RAD:
-                sight_line = -h - r + height
-            entity_r = self.cad.get_r(self.cad.bottom,h)
-            for enti_r in entity_r:
-                if enti_r >= sight_line - margine:
-                    return 0
-            return inter_phi
+        for edge, r_list in self.cad.edges_table.items():
+            if height <= edge <= height_end:
+                if inter_phi == PHI*DEG2RAD:
+                    sight_line = -edge + r + height
+                    for sub_r in r_list:
+                        if sub_r > sight_line :
+                            return 0
+            elif height >= edge >= height_end:
+                if inter_phi == -PHI*DEG2RAD:
+                    sight_line = edge + r - height
+                    for sub_r in r_list:
+                        if sub_r >= sight_line :
+                            return 0
+        return inter_phi
     
     def get_offset_fixed(self, p:PointClass, r):
         z = p.z

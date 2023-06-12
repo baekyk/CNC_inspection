@@ -9,7 +9,6 @@ FILLET = 'Fillet'
 CHAMFER = 'Chamfer'
 SURFACE = 'Surface'
 
-
 # constant
 PHI = 45
 INF = np.inf
@@ -24,10 +23,10 @@ PI_DIV_4 = np.pi/4
 RAD2DEG = 180.0 / np.pi
 DEG2RAD = np.pi / 180.0
 
-
 # EROOR MESSAGE
 MSG_ERR_EXCEPT = "an exception has occured"
 MSG_ERR_ARG_MUSTBE_EUL = "Euler Type must be only XYZ or RPY"
+MSG_ERR_LAYER = "check name of layers for centerline, entity, dimension"
 
 # CAD length unit
 UNITLESS = 0
@@ -38,3 +37,8 @@ MILLEMETERS = 4
 CENTIMETERS = 5
 METERS = 6
 KILOMETERS = 7
+
+# layer name
+CENTER_LAYER = 'BK_CENTER'
+ENTITY_LAYER = 'BK_SHAPE'
+DIM_LAYER = 'BK_DIM'
