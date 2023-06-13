@@ -280,17 +280,27 @@ class InfoCAD():
                    
             if type(b) == Arc:
                 if 360 > round(b.start_angle,4) >= 180:
-                    if b.start_point[0] <= h+init <= b.end_point[0]:
-                        y = self.get_y_arc_bottom(h+init, b)
-                        temp_r = self.center_line.start[1] - y
-                        r.append(round(temp_r, 2))
-                        # return (self.center_line.start[1] - y)
+                    if b.start_point[0] != b.end_point[0]:
+                        if b.start_point[0] <= h+init <= b.end_point[0]:
+                            y = self.get_y_arc_bottom(h+init, b)
+                            temp_r = self.center_line.start[1] - y
+                            r.append(round(temp_r, 2))
+                    else:
+                        if b.start_point[0] <= h+init <= b.start_point[0]+b.radius:
+                            y = self.get_y_arc_bottom(h+init, b)
+                            temp_r = self.center_line.start[1] - y
+                            r.append(round(temp_r, 2))
                 else:
-                    if b.end_point[0] <= h+init <= b.start_point[0]:
-                        y = self.get_y_arc_top(h+init, b)
-                        temp_r = self.center_line.start[1] - y
-                        r.append(round(temp_r, 2))
-                        # return (self.center_line.start[1] - y)
+                    if b.start_point[0] != b.end_point[0]:
+                        if b.end_point[0] <= h+init <= b.start_point[0]:
+                            y = self.get_y_arc_top(h+init, b)
+                            temp_r = self.center_line.start[1] - y
+                            r.append(round(temp_r, 2))
+                    else:
+                        if b.end_point[0] - b.radius <= h+init <= b.start_point[0]:
+                            y = self.get_y_arc_top(h+init, b)
+                            temp_r = self.center_line.start[1] - y
+                            r.append(round(temp_r, 2))
         return list(set(r))
 
     def vec2coordnt(self, vec):
@@ -333,7 +343,10 @@ def x_start_whichtype(entity):
         if 360 > round(entity.start_angle,4) >= 180:
             x_point = entity.start_point[0]
         else:
-            x_point = entity.end_point[0]
+            if entity.start_point[0] == entity.end_point[0]:
+                x_point = entity.start_point[0] - entity.radius
+            else:
+                x_point = entity.end_point[0]
     return x_point
 
 def y_start_whichtype(entity):
@@ -351,7 +364,10 @@ def x_end_whichtype(entity):
         x_point = entity.end[0]
     elif type(entity) == Arc:
         if 360 > round(entity.start_angle,4) >= 180:
-            x_point = entity.end_point[0]
+            if entity.start_point[0] == entity.end_point[0]:
+                x_point = entity.start_point[0] + entity.radius
+            else:
+                x_point = entity.end_point[0]
         else:
             x_point = entity.start_point[0]
     return x_point
@@ -370,7 +386,5 @@ def y_end_whichtype(entity):
 if __name__ == '__main__':
     
     dxf_file = 'SAMPLE2.dxf'
-    # # dxf_file = 'test.dxf'
-    center_layer = 'BK_CENTER'
+    dxf_file = 'C:/Users/baekyk/Desktop/cad_sample/SAMPLE3.dxf'
     cad = InfoCAD(dxf_file)
-    print(cad.edges_table)

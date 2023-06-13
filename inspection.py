@@ -75,19 +75,21 @@ class InspectionClass():
 
         if height_end <= 0:
             return 0
+        
         for edge, r_list in self.cad.edges_table.items():
-            if height <= edge <= height_end:
-                if inter_phi == PHI*DEG2RAD:
-                    sight_line = -edge + r + height
+            if inter_phi == PHI*DEG2RAD:
+                sight_line = edge + r - height
+                if height <= edge <= height_end:
                     for sub_r in r_list:
-                        if sub_r > sight_line :
+                        if sub_r >= sight_line + margine :
                             return 0
-            elif height >= edge >= height_end:
-                if inter_phi == -PHI*DEG2RAD:
-                    sight_line = edge + r - height
+            elif inter_phi == -PHI*DEG2RAD:
+                sight_line = -edge + r + height
+                if height >= edge >= height_end:
                     for sub_r in r_list:
-                        if sub_r >= sight_line :
+                        if sub_r >= sight_line + margine :
                             return 0
+            
         return inter_phi
     
     def get_offset_fixed(self, p:PointClass, r):
@@ -183,3 +185,15 @@ class InspectionClass():
             T_BF_list.append(T_BF)
         return T_BF_list
     
+if __name__ == '__main__':
+    
+    # dxf_file = 'SAMPLE2.dxf'
+    dxf_file = 'C:/Users/baekyk/Desktop/cad_sample/SAMPLE3.dxf'
+    T_BO = transl(np.array([1000, 0, 0])) 
+    T_EC = np.array([[1, 0, 0, 0],
+                 [0, 1, 0, -33],
+                 [0, 0, 1, 50],
+                 [0, 0, 0, 1]]) # 설계상 nominal parameters
+    D = 150
+    inspt = InspectionClass(dxf_file, T_BO, T_EC, D, np.pi, 200)
+    print(inspt.det_tilt(580, inspt.cad.get_r(inspt.cad.bottom,580)[0]))
