@@ -1,4 +1,4 @@
-from CAD_extract import *
+from .CAD_extract import *
 
 
 class PointClass():
@@ -76,7 +76,7 @@ class InspectionClass():
         if height_end <= 0:
             return 0
         
-        for edge, r_list in self.cad.edges_table.items():
+        for edge, r_list in self.cad.table_edges.items():
             if inter_phi == PHI*DEG2RAD:
                 sight_line = edge + r - height
                 if height <= edge <= height_end:
@@ -104,7 +104,7 @@ class InspectionClass():
     
     def make_all_list(self):
         '''
-        모든 edge들과 fillet 부분의 중간 부분의 높이 리스트
+        모든 edge들과 fillet 중간 부분의 높이 리스트
         '''
         all_list = list()
         for i in range(len(self.cad.edges)):
@@ -116,6 +116,19 @@ class InspectionClass():
                 all_list.append(mid)
         return all_list
     
+    def make_all_table_2(self):
+        '''
+        cad.edges_table에 fillet 중간 부분 추가 하는 함수
+        '''
+        edges = list(self.cad.table_edges.keys())
+        for i in range(len(edges)):
+            if edges[i] == edges[-1]:
+                break
+            mid = (edges[i+1] + edges[i])/2
+            if self.cad.find_whichtype(self.cad.bottom, mid) == FILLET:
+                r_list = self.cad.get_r(self.cad.bottom, mid)
+                self.cad.edges_table[mid] = r_list
+
     def inspt_all_edges(self):
         '''
         검사목록 별 검사 위치로 변환
@@ -184,16 +197,3 @@ class InspectionClass():
             T_BF[:3,3] = mm2unit(self.to_unit, T_BF[:3,3])
             T_BF_list.append(T_BF)
         return T_BF_list
-    
-if __name__ == '__main__':
-    
-    # dxf_file = 'SAMPLE2.dxf'
-    dxf_file = 'C:/Users/baekyk/Desktop/cad_sample/SAMPLE3.dxf'
-    T_BO = transl(np.array([1000, 0, 0])) 
-    T_EC = np.array([[1, 0, 0, 0],
-                 [0, 1, 0, -33],
-                 [0, 0, 1, 50],
-                 [0, 0, 0, 1]]) # 설계상 nominal parameters
-    D = 150
-    inspt = InspectionClass(dxf_file, T_BO, T_EC, D, np.pi, 200)
-    print(inspt.det_tilt(580, inspt.cad.get_r(inspt.cad.bottom,580)[0]))

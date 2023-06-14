@@ -27,6 +27,7 @@ DEG2RAD = np.pi / 180.0
 MSG_ERR_EXCEPT = "an exception has occured"
 MSG_ERR_ARG_MUSTBE_EUL = "Euler Type must be only XYZ or RPY"
 MSG_ERR_LAYER = "check name of layers for centerline, entity, dimension"
+MSG_ERR_HEIGHT = "inputed height exceeds the maximum height of object"
 
 # CAD length unit
 UNITLESS = 0

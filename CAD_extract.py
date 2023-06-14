@@ -1,8 +1,8 @@
 import ezdxf
 import numpy as np
 import sys
-from define import *
-from utils import *
+from .define import *
+from .utils import *
             
 
 class Dimension:
@@ -59,7 +59,7 @@ class InfoCAD():
         # 밑면의 entity
         self.bottom = self.bottom_entity(self.center_line, self.arcs, self.d_line, self.h_line)
         self.edges = self.edge_list(self.bottom)
-        self.edges_table = self.edge_table(self.edges)
+        self.table_edges = self.edge_table(self.edges)
 
     def verify_dxf(self, doc):
         layer_names = list()
@@ -123,6 +123,9 @@ class InfoCAD():
         v_line = []
         h_line = []
         d_line = []
+        if len(msp.query('lwpolyline')) != 0:
+            for poly in msp.query('lwpolyline'):
+                poly.explode()
         for l in msp.query('line'):
             if l.dxf.layer == ENTITY_LAYER:
                 ln = Line()
@@ -238,12 +241,12 @@ class InfoCAD():
             return line.end[1]
 
     def get_y_arc_bottom(self, x, arc):
-        t_y = np.sqrt((arc.radius)**2-(x-arc.center[0])**2)
+        t_y = np.sqrt(abs((arc.radius)**2-(x-arc.center[0])**2))
         y = arc.center[1] - t_y
         return y
     
     def get_y_arc_top(self, x, arc):
-        t_y = np.sqrt((arc.radius)**2-(x-arc.center[0])**2)
+        t_y = np.sqrt(abs((arc.radius)**2-(x-arc.center[0])**2))
         y = arc.center[1] + t_y
         return y
 
@@ -267,49 +270,48 @@ class InfoCAD():
     def get_r(self, bottom, h):
         init = x_start_whichtype(bottom[0])
         last = x_end_whichtype(bottom[-1])
-        if h > last-init:
-            raise Exception("물체 형상보다 큰 값입니다")
+        if h > round(last-init,4):
+            raise Exception(MSG_ERR_HEIGHT)
         r = list()
         for i, b in enumerate(bottom):
             if type(b) == Line:
-                if b.start[0] <= h+init <= b.end[0]:
+                if b.start[0] <= round(h+init,4) <= b.end[0]:
                     y = self.get_y_line(h+init, b)
                     temp_r = self.center_line.start[1] - y
                     r.append(round(temp_r, 2))
-                    # return (self.center_line.start[1] - y)
                    
             if type(b) == Arc:
                 if 360 > round(b.start_angle,4) >= 180:
                     if b.start_point[0] != b.end_point[0]:
-                        if b.start_point[0] <= h+init <= b.end_point[0]:
+                        if b.start_point[0] <= round(h+init,4) <= b.end_point[0]:
                             y = self.get_y_arc_bottom(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
                     else:
-                        if b.start_point[0] <= h+init <= b.start_point[0]+b.radius:
+                        if b.start_point[0] <= round(h+init,4) <= b.start_point[0]+b.radius:
                             y = self.get_y_arc_bottom(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
                 else:
                     if b.start_point[0] != b.end_point[0]:
-                        if b.end_point[0] <= h+init <= b.start_point[0]:
+                        if b.end_point[0] <= round(h+init,4) <= b.start_point[0]:
                             y = self.get_y_arc_top(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
                     else:
-                        if b.end_point[0] - b.radius <= h+init <= b.start_point[0]:
+                        if b.end_point[0] - b.radius <= round(h+init,4) <= b.start_point[0]:
                             y = self.get_y_arc_top(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
-        return list(set(r))
+        return sorted(list(set(r)))
 
     def vec2coordnt(self, vec):
         '''
         ezdxf point 포멧(vec3) -> tuple
         '''
-        coordnt = (unit2mm(self.dxf_unit,round(vec[0],3)),
-                   unit2mm(self.dxf_unit,round(vec[1],3)),
-                   unit2mm(self.dxf_unit,round(vec[2],3)))
+        coordnt = (round(unit2mm(self.dxf_unit,vec[0]),3),
+                   round(unit2mm(self.dxf_unit,vec[1]),3),
+                   round(unit2mm(self.dxf_unit,vec[2]),3))
         return coordnt
 
 def arange_point(pt1, pt2):
@@ -381,10 +383,3 @@ def y_end_whichtype(entity):
         else:
             y_point = entity.start_point[1]
     return y_point
-
-
-if __name__ == '__main__':
-    
-    dxf_file = 'SAMPLE2.dxf'
-    dxf_file = 'C:/Users/baekyk/Desktop/cad_sample/SAMPLE3.dxf'
-    cad = InfoCAD(dxf_file)
