@@ -501,19 +501,19 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2460110.620347222
+2460111.702199074
   9
 $TDUUPDATE
  40
-2460110.245347223
+2460111.327199074
   9
 $TDINDWG
  40
-0.4518402778
+0.4527893519
   9
 $TDUSRTIMER
  40
-0.4518402778
+0.4527893519
   9
 $USRTIMER
  70
@@ -553,7 +553,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-831
+898
   9
 $SURFTAB1
  70
@@ -937,7 +937,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{1DA8D3A3-E914-2048-A764-529D65568A21}
+{6D1B627A-7434-094E-92A9-F20739668E62}
   9
 $EXTNAMES
 290
@@ -1151,7 +1151,7 @@ ObjectDBX Classes
  90
         0
  91
-       18
+       15
 280
      0
 281
@@ -2293,6 +2293,22 @@ AcDbDimAssoc
 281
      0
   0
+CLASS
+  1
+RAPIDRTRENDERSETTINGS
+  2
+AcDbRapidRTRenderSettings
+  3
+ObjectDBX Classes
+ 90
+     1024
+ 91
+        7
+280
+     0
+281
+     0
+  0
 ENDSEC
   0
 SECTION
@@ -2333,9 +2349,9 @@ AcDbViewportTableRecord
  21
 1.0
  12
-627.0290419458879
+601.5100092837696
  22
-244.6892727652625
+264.5163921501494
  13
 0.0
  23
@@ -2361,7 +2377,7 @@ AcDbViewportTableRecord
  37
 0.0
  40
-125.7632661452216
+122.2562189240699
  41
 2.283154121863799
  42
@@ -3923,7 +3939,7 @@ DIMSTYLE
 102
 {ACAD_REACTORS
 330
-805
+864
 102
 }
 330
@@ -6371,7 +6387,7 @@ DIM
 100
 AcDbTrace
  10
-608.4889714817078
+608.4889714817077
  20
 251.2640456753781
  30
@@ -8329,7 +8345,7 @@ AcDbLine
  30
 0.0
  11
-634.7686986659208
+634.7686986659207
  21
 226.6631972282627
  31
@@ -10411,30 +10427,6 @@ AcDbLine
   0
 LINE
   5
-361
-330
-1F
-100
-AcDbEntity
-  8
-SHAPE
-100
-AcDbLine
- 10
-626.4480983930698
- 20
-250.764045675378
- 30
-0.0
- 11
-640.94809839307
- 21
-250.764045675378
- 31
-0.0
-  0
-LINE
-  5
 362
 330
 1F
@@ -12321,6 +12313,14 @@ ACAD_PLOTSTYLENAME
 350
 E
   3
+ACAD_RENDER_ACTIVE_RAPIDRT_SETTINGS
+350
+88F
+  3
+ACAD_RENDER_RAPIDRT_SETTINGS
+350
+888
+  3
 ACAD_SCALELIST
 350
 10C
@@ -12339,7 +12339,7 @@ EF
   3
 ACDB_RECOMPOSE_DATA
 350
-830
+897
   3
 AcDbVariableDictionary
 350
@@ -12639,11 +12639,11 @@ AcDbIdSet
  90
         3
 330
-81F
+87E
 330
-820
+87F
 330
-821
+880
 100
 AcDbFieldList
   0
@@ -12802,6 +12802,98 @@ F
 AcDbDictionaryWithDefault
 340
 F
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88F
+102
+{ACAD_REACTORS
+330
+C
+102
+}
+330
+C
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+중간
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+렌더링 반복 횟수 5번 적용
+ 90
+        0
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     0
+ 90
+        5
+ 90
+        1
+ 70
+     1
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+DICTIONARY
+  5
+888
+102
+{ACAD_REACTORS
+330
+C
+102
+}
+330
+C
+100
+AcDbDictionary
+281
+     1
+  3
+낮음
+350
+889
+  3
+높음
+350
+88B
+  3
+런치 품질
+350
+88D
+  3
+오버나이트 품질
+350
+88E
+  3
+중간
+350
+88A
+  3
+커피 브레이크 품질
+350
+88C
   0
 DICTIONARY
   5
@@ -13041,7 +13133,7 @@ X-Ray
   0
 XRECORD
   5
-830
+897
 102
 {ACAD_REACTORS
 330
@@ -13366,10 +13458,6 @@ AcDbSortentsTable
 360
   5
 36B
-331
-361
-  5
-36C
 331
 362
   5
@@ -14067,7 +14155,7 @@ ACDBDETAILVIEWSTYLE
 330
 21B
 330
-81A
+879
 102
 }
 330
@@ -15035,6 +15123,318 @@ E
 330
 E
   0
+RAPIDRTRENDERSETTINGS
+  5
+889
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+낮음
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+렌더링 반복 횟수 1번 적용
+ 90
+        0
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     0
+ 90
+        1
+ 90
+        1
+ 70
+     0
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88B
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+높음
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+렌더링 반복 횟수 10번 적용
+ 90
+        2
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     0
+ 90
+       10
+ 90
+        1
+ 70
+     2
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88D
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+런치 품질
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+60분 동안 렌더링
+ 90
+        4
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     1
+ 90
+        1
+ 90
+       60
+ 70
+     2
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88E
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+오버나이트 품질
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+12시간 동안 렌더링
+ 90
+        5
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     1
+ 90
+        1
+ 90
+      720
+ 70
+     2
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88A
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+중간
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+렌더링 반복 횟수 5번 적용
+ 90
+        1
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     0
+ 90
+        5
+ 90
+        1
+ 70
+     1
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
+RAPIDRTRENDERSETTINGS
+  5
+88C
+102
+{ACAD_REACTORS
+330
+888
+102
+}
+330
+888
+100
+AcDbRenderSettings
+ 90
+        2
+  1
+커피 브레이크 품질
+290
+     1
+290
+     0
+290
+     1
+290
+     1
+  1
+
+  1
+10분 동안 렌더링
+ 90
+        3
+100
+AcDbRapidRTRenderSettings
+ 90
+        3
+ 70
+     1
+ 90
+        1
+ 90
+       10
+ 70
+     1
+ 70
+     2
+ 40
+3.0
+ 40
+3.0
+290
+     1
+  0
 SCALE
   5
 10D
@@ -15451,7 +15851,7 @@ ACDBSECTIONVIEWSTYLE
 330
 219
 330
-819
+878
 102
 }
 330
@@ -15956,8 +16356,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -16222,8 +16620,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -16488,8 +16884,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -16754,8 +17148,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -17020,8 +17412,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -17286,8 +17676,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -17552,8 +17940,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -17818,8 +18204,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -18084,8 +18468,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -18350,8 +18732,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -18616,8 +18996,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -18882,8 +19260,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -19148,8 +19524,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -19414,8 +19788,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -19680,8 +20052,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -19946,8 +20316,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -20212,8 +20580,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -20478,8 +20844,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -20744,8 +21108,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -21010,8 +21372,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -21276,8 +21636,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -21542,8 +21900,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -21808,8 +22164,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -22074,8 +22428,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -22527,7 +22879,7 @@ AcDbDictionary
   3
 ACAD_ROUNDTRIP_2008_TABLESTYLE_CELLSTYLEMAP
 360
-82F
+896
   0
 XRECORD
   5
@@ -23073,7 +23425,7 @@ AcDbXrecord
   0
 CELLSTYLEMAP
   5
-82F
+896
 102
 {ACAD_REACTORS
 330
