@@ -254,7 +254,7 @@ class InfoCAD():
         init = x_start_whichtype(bottom[0])
         last = x_end_whichtype(bottom[-1])
         if h > last-init:
-            raise Exception("물체 형상보다 큰 값입니다")
+            raise Exception(MSG_ERR_HEIGHT)
         for b in bottom:
             start = x_start_whichtype(b)-init
             end = x_end_whichtype(b)-init

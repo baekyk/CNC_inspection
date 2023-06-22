@@ -116,7 +116,7 @@ class InspectionClass():
                 all_list.append(mid)
         return all_list
     
-    def make_all_table_2(self):
+    def make_all_table(self):
         '''
         cad.edges_table에 fillet 중간 부분 추가 하는 함수
         '''
@@ -187,7 +187,7 @@ class InspectionClass():
         특정 높이 부분 검사 위치로 변환
         '''
         if self.height == None:
-            raise Exception('검사하고 싶은 높이를 입력하세요.')
+            raise Exception(MSG_INSERT_HEIGHT)
         p = PointClass(z= self.height, d= self.offset)
         r_list = self.cad.get_r(self.cad.bottom, self.height)
         T_BF_list = list()
