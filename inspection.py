@@ -12,7 +12,7 @@ class InspectionClass():
         T_BO : 로봇으로 부터 물체의 위치 \n
         T_EC : End-effector부터 카메라의 위치 \n
         offset : 검사 위치로부터 카메라를 offset 시킬 거리 \n
-        theta : 물체의 x 좌표로 부터 로봇의 방향, 각도(radian) \n
+        theta : 물체의 x 좌표로 부터 로봇의 방향, 각도(degree) \n
         center_laber : CAD 도면 상 중심선 layer의 이름 \n
         height : 검사하려는 물체의 높이 \n
         '''
@@ -20,7 +20,7 @@ class InspectionClass():
         self.T_BO = T_BO
         self.T_EC = T_EC
         self.offset = offset
-        self.theta = theta
+        self.theta = theta*DEG2RAD
         self.height = height
         self.to_unit = unit
         
