@@ -57,8 +57,8 @@ class InfoCAD():
         self.arcs = self.get_arcs(self.msp)
 
         # 밑면의 entity
-        self.bottom = self.bottom_entity(self.center_line, self.arcs, self.d_line, self.h_line)
-        self.edges = self.edge_list(self.bottom)
+        self.surface = self.get_surface(self.center_line, self.arcs, self.d_line, self.h_line)
+        self.edges = self.get_edges(self.surface)
         self.table_edges = self.edge_table(self.edges)
 
     def verify_dxf(self, doc):
@@ -190,36 +190,36 @@ class InfoCAD():
             inserts.append(ins)
         return inserts
 
-    def edge_list(self, bottom):
+    def get_edges(self, surface):
         edges = list()
-        init = x_start_whichtype(bottom[0])
-        for b in bottom:
+        init = x_start_whichtype(surface[0])
+        for b in surface:
             edges.append(round(x_start_whichtype(b)-init,3))
-        edges.append(round(x_end_whichtype(bottom[-1])-init,3))
+        edges.append(round(x_end_whichtype(surface[-1])-init,3))
         return edges
 
     def edge_table(self, edges):
         edges_table = dict()
         for edge in edges:
-            r_list = self.get_r(self.bottom, edge)
+            r_list = self.get_r(self.surface, edge)
             edges_table[edge]=r_list
         return edges_table
 
-    def bottom_entity(self, center_line, arcs, d_line, h_line):
-        bottom = list()
+    def get_surface(self, center_line, arcs, d_line, h_line):
+        surface = list()
         cl = center_line.start[1]
         for arc in arcs:
             if arc.start_point[1] < cl or \
                 arc.end_point[1] < cl:
-                bottom.append(arc)
+                surface.append(arc)
 
         for d in d_line:
             if d.start[1] < cl:
-                bottom.append(d)
+                surface.append(d)
 
         for h in h_line:
             if h.start[1] < cl:
-                bottom.append(h)
+                surface.append(h)
 
         def sort_key(x):
             if type(x) == Line:
@@ -229,8 +229,8 @@ class InfoCAD():
                     return x.start_point[0]
                 else:
                     return x.end_point[0]
-        bottom = sorted(bottom, key=lambda x: sort_key(x) )
-        return bottom
+        surface = sorted(surface, key=lambda x: sort_key(x) )
+        return surface
     
     def get_y_line(self, x, line):
         if line.start[1] != line.end[1]:
@@ -240,7 +240,7 @@ class InfoCAD():
         else:
             return line.end[1]
 
-    def get_y_arc_bottom(self, x, arc):
+    def get_y_arc_surface(self, x, arc):
         t_y = np.sqrt(abs((arc.radius)**2-(x-arc.center[0])**2))
         y = arc.center[1] - t_y
         return y
@@ -250,12 +250,12 @@ class InfoCAD():
         y = arc.center[1] + t_y
         return y
 
-    def find_whichtype(self, bottom, h):
-        init = x_start_whichtype(bottom[0])
-        last = x_end_whichtype(bottom[-1])
+    def find_whichtype(self, surface, h):
+        init = x_start_whichtype(surface[0])
+        last = x_end_whichtype(surface[-1])
         if h > last-init:
             raise Exception(MSG_ERR_HEIGHT)
-        for b in bottom:
+        for b in surface:
             start = x_start_whichtype(b)-init
             end = x_end_whichtype(b)-init
             if start <= h < end:
@@ -267,13 +267,13 @@ class InfoCAD():
                     else:
                         return SURFACE
 
-    def get_r(self, bottom, h):
-        init = x_start_whichtype(bottom[0])
-        last = x_end_whichtype(bottom[-1])
+    def get_r(self, surface, h):
+        init = x_start_whichtype(surface[0])
+        last = x_end_whichtype(surface[-1])
         if h > round(last-init,4):
             raise Exception(MSG_ERR_HEIGHT)
         r = list()
-        for i, b in enumerate(bottom):
+        for i, b in enumerate(surface):
             if type(b) == Line:
                 if b.start[0] <= round(h+init,4) <= b.end[0]:
                     y = self.get_y_line(h+init, b)
@@ -284,12 +284,12 @@ class InfoCAD():
                 if 360 > round(b.start_angle,4) >= 180:
                     if b.start_point[0] != b.end_point[0]:
                         if b.start_point[0] <= round(h+init,4) <= b.end_point[0]:
-                            y = self.get_y_arc_bottom(h+init, b)
+                            y = self.get_y_arc_surface(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
                     else:
                         if b.start_point[0] <= round(h+init,4) <= b.start_point[0]+b.radius:
-                            y = self.get_y_arc_bottom(h+init, b)
+                            y = self.get_y_arc_surface(h+init, b)
                             temp_r = self.center_line.start[1] - y
                             r.append(round(temp_r, 2))
                 else:

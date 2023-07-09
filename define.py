@@ -10,7 +10,6 @@ CHAMFER = 'Chamfer'
 SURFACE = 'Surface'
 
 # constant
-PHI = 45
 INF = np.inf
 
 # Math
