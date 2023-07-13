@@ -95,7 +95,7 @@ class InspectionClass():
                             if sub_r >= sight_line + margine :
                                 return 0
             
-        return inter_phi
+            return inter_phi
     
     def get_offset_fixed(self, p:PointClass, r):
         z = p.z

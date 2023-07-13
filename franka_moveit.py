@@ -193,14 +193,14 @@ class MoveGroupFranka(object):
             inspt_pose = list_to_pose(inspt_RPY)
             move_group.set_pose_target(inspt_pose)
 
-        ## Now, we call the planner to compute the plan and execute it.
-        # `go()` returns a boolean indicating whether the planning and execution was successful.
-        success = move_group.go(wait=True)
-        # Calling `stop()` ensures that there is no residual movement
-        move_group.stop()
-        # It is always good to clear your targets after planning with poses.
-        # Note: there is no equivalent function for clear_joint_value_targets().
-        move_group.clear_pose_targets()
+            ## Now, we call the planner to compute the plan and execute it.
+            # `go()` returns a boolean indicating whether the planning and execution was successful.
+            success = move_group.go(wait=True)
+            # Calling `stop()` ensures that there is no residual movement
+            move_group.stop()
+            # It is always good to clear your targets after planning with poses.
+            # Note: there is no equivalent function for clear_joint_value_targets().
+            move_group.clear_pose_targets()
 
         ## END_SUB_TUTORIAL
 
@@ -230,7 +230,7 @@ def main():
                          [0, 0, 0, 1]]) # 설계상 nominal parameters
         H = 70
         D = 30
-        THETA = np.pi
+        THETA = 180
         T_BO = transl(np.array([630, 0, 0])) 
 
         # -- load inspt path -- #
