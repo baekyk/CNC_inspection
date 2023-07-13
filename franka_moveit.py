@@ -235,7 +235,7 @@ def main():
 
         # -- load inspt path -- #
         inspt_clss = InspectionClass(TARGET_DXF, T_BO, T_EC, D, THETA, H, METERS)
-        list_all_edges = inspt_clss.list_inspt_all_edges()
+        list_all_edges = inspt_clss.inspt_all_edges()
         spec_edge = inspt_clss.inspt_spec_edge()
 
         input("============ Press `Enter` to execute a movement using a pose goal ...")

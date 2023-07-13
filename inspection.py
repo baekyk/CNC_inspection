@@ -152,7 +152,7 @@ class InspectionClass():
             dict_T_BF[h] = T_BF_list
         return dict_T_BF
     
-    def inspt_all_edges(self):
+    def list_all_edges(self):
         '''
         가공품의 밑 부분부터 위쪽으로 edge를 순차적으로 검사
         '''
@@ -184,7 +184,7 @@ class InspectionClass():
                     list_all_edges.append(T_BF[0])
         return list_all_edges
     
-    def inspt_spec_edge(self):
+    def list_spec_edge(self):
         '''
         특정 높이 부분 검사 위치로 변환
         '''
