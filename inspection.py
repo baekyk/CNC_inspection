@@ -7,7 +7,7 @@ class PointClass():
         self.d = d
 
 class InspectionClass():
-    def __init__(self, dxf, T_BO, T_EC, offset, theta, height=None, to_unit=MILLEMETERS, phi = 45):
+    def __init__(self, dxf, T_BO, T_EC, offset, theta, height=None, to_unit=MILLEMETERS, phi = None):
         '''
         T_BO : 로봇으로부터 가공품까지의 위치 \n
         T_EC : 로봇의 End-effector부터 카메라 중심점까지의 위치 \n
@@ -49,48 +49,51 @@ class InspectionClass():
         r = self.cad.get_r(self.cad.surface, height)[0]
 
         if left < r and r <= right:
-            return -self.phi*DEG2RAD
+            return -PHI*DEG2RAD
         elif left <= r and r < right:
-            return -self.phi*DEG2RAD
+            return -PHI*DEG2RAD
         elif left == r and r == right:
             return 0
         elif left > r and r < right:
             return 0
         elif left >= r and r > right:
-            return self.phi*DEG2RAD
+            return PHI*DEG2RAD
         elif left > r and r >= right:
-            return self.phi*DEG2RAD
+            return PHI*DEG2RAD
         
     def det_tilt(self, height, r):
         '''
         det_inter_tilt에서 반환된 tilt 값에 대한 카메라 시야를 고려하여
         다른 형상이 시야를 방해하는지 고려하여 tilt 값 반환
         '''
-        inter_phi = self.det_inter_tilt(height)
-        if inter_phi == 0 :
-            return 0
-        elif inter_phi > 0:
-            height_end = height + self.offset*np.sin(self.phi*DEG2RAD)
-        elif inter_phi < 0 :
-            height_end = height - self.offset*np.sin(self.phi*DEG2RAD)
-        margine = self.offset*0.05
+        if self.phi != None:
+            return self.phi*DEG2RAD
+        else:
+            inter_phi = self.det_inter_tilt(height)
+            if inter_phi == 0 :
+                return 0
+            elif inter_phi > 0:
+                height_end = height + self.offset*np.sin(PHI*DEG2RAD)
+            elif inter_phi < 0 :
+                height_end = height - self.offset*np.sin(PHI*DEG2RAD)
+            margine = self.offset*0.05
 
-        if height_end <= 0:
-            return 0
-        
-        for edge, r_list in self.cad.table_edges.items():
-            if inter_phi == self.phi*DEG2RAD:
-                sight_line = edge + r - height
-                if height <= edge <= height_end:
-                    for sub_r in r_list:
-                        if sub_r >= sight_line + margine :
-                            return 0
-            elif inter_phi == -self.phi*DEG2RAD:
-                sight_line = -edge + r + height
-                if height >= edge >= height_end:
-                    for sub_r in r_list:
-                        if sub_r >= sight_line + margine :
-                            return 0
+            if height_end <= 0:
+                return 0
+            
+            for edge, r_list in self.cad.table_edges.items():
+                if inter_phi == PHI*DEG2RAD:
+                    sight_line = edge + r - height
+                    if height <= edge <= height_end:
+                        for sub_r in r_list:
+                            if sub_r >= sight_line + margine :
+                                return 0
+                elif inter_phi == -PHI*DEG2RAD:
+                    sight_line = -edge + r + height
+                    if height >= edge >= height_end:
+                        for sub_r in r_list:
+                            if sub_r >= sight_line + margine :
+                                return 0
             
         return inter_phi
     
@@ -163,26 +166,29 @@ class InspectionClass():
                 list_all_edges.append(T_BF[0])
         return list_all_edges
     
-    def inspt_all_edges_tilt_ord(self):
+    def list_all_edges_tilt_ord(self):
         '''
         검사 각도 tilt 값이 PHI, 0, -PHI 값 순서로 검사
         (PHI 각도의 edge 모두 검사 -> 0 각도 -> -PHI 각도)
         '''
-        dict_T_BF = self.inspt_all_edges()
-        list_all_edges = list()
-        for edge, T_BF_list in dict_T_BF.items():
-            for T_BF in T_BF_list:
-                if T_BF[1] == self.phi*DEG2RAD:
-                    list_all_edges.append(T_BF[0])
-        for edge, T_BF_list in dict_T_BF.items():
-            for T_BF in T_BF_list:
-                if T_BF[1] == 0:
-                    list_all_edges.append(T_BF[0])
-        for edge, T_BF_list in dict_T_BF.items():
-            for T_BF in T_BF_list:
-                if T_BF[1] == -self.phi*DEG2RAD:
-                    list_all_edges.append(T_BF[0])
-        return list_all_edges
+        if self.phi != None:
+            return self.list_all_edges()
+        else:
+            dict_T_BF = self.inspt_all_edges()
+            list_all_edges = list()
+            for edge, T_BF_list in dict_T_BF.items():
+                for T_BF in T_BF_list:
+                    if T_BF[1] == PHI*DEG2RAD:
+                        list_all_edges.append(T_BF[0])
+            for edge, T_BF_list in dict_T_BF.items():
+                for T_BF in T_BF_list:
+                    if T_BF[1] == 0:
+                        list_all_edges.append(T_BF[0])
+            for edge, T_BF_list in dict_T_BF.items():
+                for T_BF in T_BF_list:
+                    if T_BF[1] == -PHI*DEG2RAD:
+                        list_all_edges.append(T_BF[0])
+            return list_all_edges
     
     def list_spec_edge(self):
         '''

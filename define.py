@@ -11,6 +11,7 @@ SURFACE = 'Surface'
 
 # constant
 INF = np.inf
+PHI = 45
 
 # Math
 PI = np.pi; 
