@@ -195,6 +195,9 @@ class InfoCAD():
         init = x_start_whichtype(surface[0])
         for b in surface:
             edges.append(round(x_start_whichtype(b)-init,3))
+            if type(b) == Arc:
+                mid = round((x_end_whichtype(b) + x_start_whichtype(b)-2*init)/2,3)
+                edges.append(mid)
         edges.append(round(x_end_whichtype(surface[-1])-init,3))
         return edges
 

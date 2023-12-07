@@ -132,7 +132,7 @@ class InspectionClass():
             mid = (edges[i+1] + edges[i])/2
             if self.cad.find_whichtype(self.cad.surface, mid) == FILLET:
                 r_list = self.cad.get_r(self.cad.surface, mid)
-                self.cad.edges_table[mid] = r_list
+                self.cad.table_edges[mid] = r_list
 
     def inspt_all_edges(self):
         '''
@@ -142,8 +142,7 @@ class InspectionClass():
         value : 가공품의 높이에 대한 검사 위치 리스트
         '''
         dict_T_BF = dict()
-        edge_list = self.make_all_list()
-        for h in edge_list:
+        for h in self.cad.edges:
             p = PointClass(z= h, d= self.offset)
             r_list = self.cad.get_r(self.cad.surface, h)
             T_BF_list = list()
