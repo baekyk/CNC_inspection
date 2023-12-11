@@ -329,34 +329,116 @@ class InfoCAD():
                    round(unit2mm(self.dxf_unit,vec[2]),3))
         return coordnt
 
-    def spec_point(self, height) -> list:
+
+class InspectPoint(InfoCAD):
+    def __init__(self, target_dxf, offset, height=None, theta=180, phi=None):
+        super().__init__(target_dxf)
+        '''
+        offset : offset : 검사 위치로부터 카메라 중심점까지의 거리 \n
+        phi : phi = 검사 부위에 대한 카메라 각도[degree]
+        '''
+        self.offset = offset
+        self.height = height
+        self.theta = theta
+        self.phi = phi
+
+    def det_inter_tilt(self, height):
+        '''
+        가공품의 특정 높이에서 단순 상하 형상 비교하여 카메라 tilt 값 반환
+        '''
+        diff = 0.5
+        l_diff = height-diff
+        r_diff = height+diff
+        if r_diff > self.edges[-1]:
+            r_diff = self.edges[-1]
+        if l_diff < self.edges[0]:
+            l_diff = self.edges[0]
+        left = self.get_r(self.surface, l_diff)[0]
+        right = self.get_r(self.surface, r_diff)[0]
+        r = self.get_r(self.surface, height)[0]
+
+        if left < r and r <= right:
+            return -PHI*DEG2RAD
+        elif left <= r and r < right:
+            return -PHI*DEG2RAD
+        elif left == r and r == right:
+            return 0
+        elif left > r and r < right:
+            return 0
+        elif left >= r and r > right:
+            return PHI*DEG2RAD
+        elif left > r and r >= right:
+            return PHI*DEG2RAD
+        
+    def det_tilt(self, height, r):
+        '''
+        det_inter_tilt에서 반환된 tilt 값에 대한 카메라 시야를 고려하여
+        다른 형상이 시야를 방해하는지 고려하여 tilt 값 반환
+        '''
+        if self.phi != None:
+            return self.phi*DEG2RAD
+        else:
+            inter_phi = self.det_inter_tilt(height)
+            if inter_phi == 0 :
+                return 0
+            elif inter_phi > 0:
+                height_end = height + self.offset*np.sin(PHI*DEG2RAD)
+            elif inter_phi < 0 :
+                height_end = height - self.offset*np.sin(PHI*DEG2RAD)
+            margine = self.offset*0.05
+
+            if height_end <= 0:
+                return 0
+            
+            for edge, r_list in self.table_edges.items():
+                if inter_phi == PHI*DEG2RAD:
+                    sight_line = edge + r - height
+                    if height <= edge <= height_end:
+                        for sub_r in r_list:
+                            if sub_r >= sight_line + margine :
+                                return 0
+                elif inter_phi == -PHI*DEG2RAD:
+                    sight_line = -edge + r + height
+                    if height >= edge >= height_end:
+                        for sub_r in r_list:
+                            if sub_r >= sight_line + margine :
+                                return 0
+            
+            return inter_phi
+    
+    def get_offset_fixed(self, x, z, offset):
+        '''
+        가공품 검사위치 포인트로부터 offset과 카메라 tilt를 고려한 카메라의 t-form
+        '''
+        phi = self.det_tilt(z, x)
+        off_x = (x+offset*np.cos(phi))*np.cos(self.theta)
+        off_y = (x+offset*np.cos(phi))*np.sin(self.theta)
+        off_z = z + offset*np.sin(phi)
+        tform = transl([off_x, off_y, off_z])
+        return tform @ trotx(np.pi) @ troty(np.pi/2 - phi)
+    
+    def spec_points(self) -> list:
         '''
         가공품의 특정 높이에 대한 검사위치의 3D좌표 리스트
         '''
-        x_list = self.get_r(self.surface, height)
-        y = 0
-        z = height
+        x_list = self.get_r(self.surface, self.height)
+        z = self.height
         list_3D_points = list()
         for x in x_list:
-            list_3D_points.append((x, y, z))
+            list_3D_points.append(self.get_offset_fixed(x, z, self.offset))
         return list_3D_points
     
     def all_points(self) -> dict:
         '''
-        가공품의 모든 모서리에 대한 검사위치의 3D좌표 dict
-        - key : 가공품의 높이
-        - value : 해당 모서리에 대응되는 검사위치의 3D좌표 리스트
+        가공품의 모든 모서리에 대한 검사위치의 3D좌표 리스트
         '''
-        dict_3D_points = dict()
+        list_3D_points = list()
         for h in self.edges:
             x_list = self.get_r(self.surface, h)
-            y = 0
             z = h
-            list_3D_points = list()
             for x in x_list:
-                list_3D_points.append((x, y, z))
-            dict_3D_points[h] = list_3D_points
-        return dict_3D_points
+                list_3D_points.append(self.get_offset_fixed(x, z, self.offset))
+        return list_3D_points
 
 def arange_point(pt1, pt2):
     '''
