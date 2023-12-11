@@ -1,6 +1,5 @@
 import ezdxf
 import numpy as np
-import sys
 from .define import *
 from .utils import *
             
@@ -20,8 +19,8 @@ class Line:
     def __init__(self):
         self.start = 0
         self.end = 0 
-        self.thickness = 0
-        self.linetype = ''
+        # self.thickness = 0    # 사용안함
+        # self.linetype = ''    # 사용안함
 
 class Arc:
     def __init__(self):
@@ -34,6 +33,10 @@ class Arc:
 
 class Insert:
     def __init__(self):
+        """
+        형상의 특정 부분을 지시하는 지시선
+        ex) Chamfer(모따기) 형상 수치 입력
+        """
         self.text = ''
         self.point = 0
         self.flag = None
@@ -42,21 +45,20 @@ class InfoCAD():
     def __init__(self, target_dxf):
         self.dxf_file = target_dxf
 
-        # dxf 파일 읽기
+        # -- dxf 파일 읽기 -- #
         self.doc = self.data_loader(self.dxf_file)
         self.verify_dxf(self.doc)
         self.msp = self.doc.modelspace()
         self.dxf_unit = self.get_dxf_unit()
-        # self.dxf_unit = CENTIMETERS
 
-        # entities 추출
+        # -- entities 추출 -- #
         self.v_dim, self.h_dim, self.angle_dim = self.get_dimensions(self.msp)
         self.v_line, self.h_line, self.d_line= self.get_lines(self.msp)
         self.center_line = self.get_centerline(self.msp)
         self.inserts = self.get_inserts(self.doc, self.msp)
         self.arcs = self.get_arcs(self.msp)
 
-        # 밑면의 entity
+        # -- 밑면의 entity -- #
         self.surface = self.get_surface(self.center_line, self.arcs, self.d_line, self.h_line)
         self.edges = self.get_edges(self.surface)
         self.table_edges = self.edge_table(self.edges)
@@ -190,7 +192,10 @@ class InfoCAD():
             inserts.append(ins)
         return inserts
 
-    def get_edges(self, surface):
+    def get_edges(self, surface) -> list:
+        '''
+        가공품 각 모서리들의 x 좌표 리스트(centerline 방향)
+        '''
         edges = list()
         init = x_start_whichtype(surface[0])
         for b in surface:
@@ -201,7 +206,11 @@ class InfoCAD():
         edges.append(round(x_end_whichtype(surface[-1])-init,3))
         return edges
 
-    def edge_table(self, edges):
+    def edge_table(self, edges) -> dict:
+        '''
+        key : 가공품의 모서리
+        value : 해당 모서리에 대응되는 반지름 값 리스트
+        '''
         edges_table = dict()
         for edge in edges:
             r_list = self.get_r(self.surface, edge)
@@ -209,6 +218,9 @@ class InfoCAD():
         return edges_table
 
     def get_surface(self, center_line, arcs, d_line, h_line):
+        '''
+        가공품의 밑면을 이루고 있는 객체들의 리스트
+        '''
         surface = list()
         cl = center_line.start[1]
         for arc in arcs:
@@ -316,6 +328,35 @@ class InfoCAD():
                    round(unit2mm(self.dxf_unit,vec[1]),3),
                    round(unit2mm(self.dxf_unit,vec[2]),3))
         return coordnt
+
+    def spec_point(self, height) -> list:
+        '''
+        가공품의 특정 높이에 대한 검사위치의 3D좌표 리스트
+        '''
+        x_list = self.get_r(self.surface, height)
+        y = 0
+        z = height
+        list_3D_points = list()
+        for x in x_list:
+            list_3D_points.append((x, y, z))
+        return list_3D_points
+    
+    def all_points(self) -> dict:
+        '''
+        가공품의 모든 모서리에 대한 검사위치의 3D좌표 dict
+        - key : 가공품의 높이
+        - value : 해당 모서리에 대응되는 검사위치의 3D좌표 리스트
+        '''
+        dict_3D_points = dict()
+        for h in self.edges:
+            x_list = self.get_r(self.surface, h)
+            y = 0
+            z = h
+            list_3D_points = list()
+            for x in x_list:
+                list_3D_points.append((x, y, z))
+            dict_3D_points[h] = list_3D_points
+        return dict_3D_points
 
 def arange_point(pt1, pt2):
     '''

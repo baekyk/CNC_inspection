@@ -1,34 +1,30 @@
-from .CAD_extract import *
+from .core import *
 
 
-class PointClass():
-    def __init__(self, z, d):
-        self.z = z
-        self.d = d
-
-class InspectionClass():
-    def __init__(self, dxf, T_BO, T_EC, offset, theta, height=None, to_unit=MILLEMETERS, phi = None):
+class RobotInspectPoint():
+    def __init__(self, InfoCAD, T_BO, T_EC, offset, theta, height=None, robot_unit=MILLEMETERS, phi=None):
         '''
+        cad : InfoCAD 클래스 객체
         T_BO : 로봇으로부터 가공품까지의 위치 \n
         T_EC : 로봇의 End-effector부터 카메라 중심점까지의 위치 \n
         offset : 검사 위치로부터 카메라 중심점까지의 거리 \n
         theta : 가공품으로부터 카메라가 위치한 방향(각도)[degree] \n
-        height : 검사하려는 가공품의 높이[mm] \n
-        to_unit : 로봇 작동을 위한 mm에서 변환시킬 단위 \n
+        robot_unit : 로봇 작동을 위한 mm에서 변환시킬 단위 \n
         phi = 검사 부위에 대한 카메라 각도[degree]
         '''
-        self.cad = InfoCAD(dxf)
+        self.cad = InfoCAD
         self.T_BO = T_BO
         self.T_EC = T_EC
         self.offset = offset
         self.theta = theta*DEG2RAD
         self.height = height
-        self.to_unit = to_unit
+        self.robot_unit = robot_unit
         self.phi = phi
         
     def destination(self, T_OF):
         """
-        get robot target pose
+        end-effector 카메라의 t-form
+        - 로봇 좌표계 기준
         """
         T_BF = self.T_BO @ T_OF @ inv_tform(self.T_EC)
         return T_BF
@@ -97,110 +93,41 @@ class InspectionClass():
             
             return inter_phi
     
-    def get_offset_fixed(self, p:PointClass, r):
-        z = p.z
-        d = p.d
-        phi = self.det_tilt(z, r)
-        off_x = (r+d*np.cos(phi))*np.cos(self.theta)
-        off_y = (r+d*np.cos(phi))*np.sin(self.theta)
-        off_z = z + d*np.sin(phi)
+    def get_offset_fixed(self, x, z, offset):
+        '''
+        가공품 검사위치 포인트로부터 offset과 카메라 tilt를 고려한 카메라의 t-form
+        - 가공품 좌표계 기준
+        '''
+        phi = self.det_tilt(z, x)
+        off_x = (x+offset*np.cos(phi))*np.cos(self.theta)
+        off_y = (x+offset*np.cos(phi))*np.sin(self.theta)
+        off_z = z + offset*np.sin(phi)
         tform = transl([off_x, off_y, off_z])
         return tform @ trotx(np.pi) @ troty(np.pi/2 - phi)
     
-    def make_all_list(self):
+    def list_spec_inspect(self):
         '''
-        모든 edge들과 fillet 중간 부분의 높이 리스트
+        가공품의 특정높이에 대한 end-effector 카메라가 위치할 t-form 리스트
         '''
-        all_list = list()
-        for i in range(len(self.cad.edges)):
-            all_list.append(self.cad.edges[i])
-            if self.cad.edges[i] == self.cad.edges[-1]:
-                break
-            mid = (self.cad.edges[i+1]+self.cad.edges[i])/2
-            if self.cad.find_whichtype(self.cad.surface, mid) == FILLET: 
-                all_list.append(mid)
-        return all_list
-    
-    def make_all_table(self):
-        '''
-        cad.edges_table에 fillet 중간 부분 추가 하는 함수
-        '''
-        edges = list(self.cad.table_edges.keys())
-        for i in range(len(edges)):
-            if edges[i] == edges[-1]:
-                break
-            mid = (edges[i+1] + edges[i])/2
-            if self.cad.find_whichtype(self.cad.surface, mid) == FILLET:
-                r_list = self.cad.get_r(self.cad.surface, mid)
-                self.cad.table_edges[mid] = r_list
-
-    def inspt_all_edges(self):
-        '''
-        검사목록 별 검사 위치로 변환
-
-        key : 가공품의 높이
-        value : 가공품의 높이에 대한 검사 위치 리스트
-        '''
-        dict_T_BF = dict()
-        for h in self.cad.edges:
-            p = PointClass(z= h, d= self.offset)
-            r_list = self.cad.get_r(self.cad.surface, h)
-            T_BF_list = list()
-            for r in r_list:
-                T_OF = self.get_offset_fixed(p, r)
-                T_BF = self.destination(T_OF)
-                T_BF[:3,3] = mm2unit(self.to_unit, T_BF[:3,3])
-                T_BF_list.append([T_BF, self.det_tilt(h, r)])
-            dict_T_BF[h] = T_BF_list
-        return dict_T_BF
-    
-    def list_all_edges(self):
-        '''
-        가공품의 밑 부분부터 위쪽으로 edge를 순차적으로 검사
-        '''
-        dict_T_BF = self.inspt_all_edges()
-        list_all_edges = list()
-        for edge, T_BF_list in dict_T_BF.items():
-            for T_BF in T_BF_list:
-                list_all_edges.append(T_BF[0])
-        return list_all_edges
-    
-    def list_all_edges_tilt_ord(self):
-        '''
-        검사 각도 tilt 값이 PHI, 0, -PHI 값 순서로 검사
-        (PHI 각도의 edge 모두 검사 -> 0 각도 -> -PHI 각도)
-        '''
-        if self.phi != None:
-            return self.list_all_edges()
-        else:
-            dict_T_BF = self.inspt_all_edges()
-            list_all_edges = list()
-            for edge, T_BF_list in dict_T_BF.items():
-                for T_BF in T_BF_list:
-                    if T_BF[1] == PHI*DEG2RAD:
-                        list_all_edges.append(T_BF[0])
-            for edge, T_BF_list in dict_T_BF.items():
-                for T_BF in T_BF_list:
-                    if T_BF[1] == 0:
-                        list_all_edges.append(T_BF[0])
-            for edge, T_BF_list in dict_T_BF.items():
-                for T_BF in T_BF_list:
-                    if T_BF[1] == -PHI*DEG2RAD:
-                        list_all_edges.append(T_BF[0])
-            return list_all_edges
-    
-    def list_spec_edge(self):
-        '''
-        특정 높이 부분 검사 위치로 변환
-        '''
-        if self.height == None:
-            raise Exception(MSG_INSERT_HEIGHT)
-        p = PointClass(z= self.height, d= self.offset)
-        r_list = self.cad.get_r(self.cad.surface, self.height)
         T_BF_list = list()
-        for r in r_list:
-            T_OF = self.get_offset_fixed(p, r)
+        points = self.cad.spec_point(self.height)
+        for point in points:
+            T_OF = self.get_offset_fixed(point[0], point[2], self.offset)
             T_BF = self.destination(T_OF)
-            T_BF[:3,3] = mm2unit(self.to_unit, T_BF[:3,3])
+            T_BF[:3,3] = mm2unit(self.robot_unit, T_BF[:3,3])
             T_BF_list.append(T_BF)
+        return T_BF_list
+    
+    def list_all_inspect(self):
+        '''
+        가공품의 모든 모서리에 대한 end-effector 카메라가 위치할 t-form 리스트
+        '''
+        T_BF_list = list()
+        dict_points = self.cad.all_points()
+        for points in dict_points.values():
+            for point in points:
+                T_OF = self.get_offset_fixed(point[0], point[2], self.offset)
+                T_BF = self.destination(T_OF)
+                T_BF[:3,3] = mm2unit(self.robot_unit, T_BF[:3,3])
+                T_BF_list.append(T_BF)
         return T_BF_list
