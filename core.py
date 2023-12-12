@@ -331,14 +331,14 @@ class InfoCAD():
 
 
 class InspectPoint(InfoCAD):
-    def __init__(self, target_dxf, offset, height=None, theta=180, phi=None):
+    def __init__(self, target_dxf, offset, theta=180, phi=None):
         super().__init__(target_dxf)
         '''
-        offset : offset : 검사 위치로부터 카메라 중심점까지의 거리 \n
+        offset : offset : 검사 위치로부터 카메라 중심점까지의 거리[mm] \n
+        theta : 가공품으로부터 카메라가 위치한 방향(각도)[degree] \n
         phi : phi = 검사 부위에 대한 카메라 각도[degree]
         '''
         self.offset = offset
-        self.height = height
         self.theta = theta
         self.phi = phi
 
@@ -417,12 +417,12 @@ class InspectPoint(InfoCAD):
         tform = transl([off_x, off_y, off_z])
         return tform @ trotx(np.pi) @ troty(np.pi/2 - phi)
     
-    def spec_points(self) -> list:
+    def spec_points(self, height) -> list:
         '''
         가공품의 특정 높이에 대한 검사위치의 3D좌표 리스트
         '''
-        x_list = self.get_r(self.surface, self.height)
-        z = self.height
+        x_list = self.get_r(self.surface, height)
+        z = height
         list_3D_points = list()
         for x in x_list:
             list_3D_points.append(self.get_offset_fixed(x, z, self.offset))
