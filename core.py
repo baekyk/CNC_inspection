@@ -411,11 +411,11 @@ class InspectPoint(InfoCAD):
         가공품 검사위치 포인트로부터 offset과 카메라 tilt를 고려한 카메라의 t-form
         '''
         phi = self.det_tilt(z, x)
-        off_x = (x+offset*np.cos(phi))*np.cos(self.theta)
-        off_y = (x+offset*np.cos(phi))*np.sin(self.theta)
+        off_x = (x+offset*np.cos(phi))*np.cos(self.theta * DEG2RAD)
+        off_y = (x+offset*np.cos(phi))*np.sin(self.theta * DEG2RAD)
         off_z = z + offset*np.sin(phi)
         tform = transl([off_x, off_y, off_z])
-        return tform @ trotx(np.pi) @ troty(np.pi/2 - phi)
+        return tform @ trotz(np.pi) @ troty(np.pi/2 + phi)
     
     def spec_points(self, height) -> list:
         '''
